@@ -1,0 +1,12 @@
+# Freeze a pricing snapshot on the date each final experiment begins.
+# Do not silently update prices halfway through a collection run.
+#
+# The current runner can also read these fields directly from each model config:
+# input_usd_per_million
+# output_usd_per_million
+#
+# Example only:
+pricing_snapshot:
+  date: YYYY-MM-DD
+  notes: "Populate from official provider documentation before final collection."
+  models: {}
