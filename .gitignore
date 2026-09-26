@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.env
+.DS_Store
+
+# Generated/private research data
+data/generated/*.csv
+data/historical/private/
+data/human/private/
+results/raw/*.csv
+results/raw/*.jsonl
+
+!data/generated/README.md
+!results/raw/README.md
