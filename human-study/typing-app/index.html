@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prompt Typing Study</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
+    .card { border: 1px solid #ddd; border-radius: 14px; padding: 1rem; margin: 1rem 0; }
+    label { display:block; margin:.75rem 0 .25rem; font-weight:600; }
+    input, select, textarea, button { width:100%; box-sizing:border-box; font:inherit; padding:.7rem; }
+    textarea { min-height:160px; }
+    button { margin-top:1rem; cursor:pointer; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .muted { color:#666; font-size:.92rem; }
+    #status { margin-top:1rem; font-weight:600; }
+  </style>
+</head>
+<body>
+  <h1>Prompt Typing Study</h1>
+  <p class="muted">This page records keystrokes only while the prompt box is focused. Data stays in this browser until you export it.</p>
+
+  <div class="card">
+    <label><input id="consent" type="checkbox" style="width:auto"> I have read the study information and consent to participate.</label>
+    <label>Anonymous participant code</label>
+    <input id="participant" placeholder="e.g. P012">
+
+    <div class="row">
+      <div>
+        <label>Device</label>
+        <select id="device">
+          <option>laptop</option>
+          <option>phone</option>
+        </select>
+      </div>
+      <div>
+        <label>Condition</label>
+        <select id="condition">
+          <option value="careful">careful</option>
+          <option value="rapid">rapid / no corrections</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Autocorrect</label>
+    <select id="autocorrect">
+      <option value="unknown">unknown</option>
+      <option value="on">on</option>
+      <option value="off">off</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <strong>Task <span id="taskIndex">1</span> / <span id="taskTotal">?</span></strong>
+    <p id="intent"></p>
+    <label>Your natural AI prompt</label>
+    <textarea id="prompt" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+    <button id="submit">Save response and next task</button>
+    <div id="status"></div>
+  </div>
+
+  <button id="download">Download de-identified CSV</button>
+
+<script>
+let tasks = [];
+let current = 0;
+let records = [];
+let startedAt = null;
+let backspaces = 0;
+let edits = 0;
+
+const promptBox = document.getElementById('prompt');
+
+fetch('../tasks.json').then(r => r.json()).then(data => {
+  tasks = data;
+  document.getElementById('taskTotal').textContent = tasks.length;
+  renderTask();
+});
+
+function renderTask() {
+  if (current >= tasks.length) {
+    document.getElementById('intent').textContent = 'All tasks complete. Download the CSV below.';
+    promptBox.disabled = true;
+    document.getElementById('submit').disabled = true;
+    return;
+  }
+  document.getElementById('taskIndex').textContent = current + 1;
+  document.getElementById('intent').textContent = tasks[current].intent;
+  promptBox.value = '';
+  backspaces = 0;
+  edits = 0;
+  startedAt = null;
+  document.getElementById('status').textContent = '';
+}
+
+promptBox.addEventListener('focus', () => {
+  if (startedAt === null) startedAt = performance.now();
+});
+
+promptBox.addEventListener('keydown', e => {
+  edits += 1;
+  if (e.key === 'Backspace' || e.key === 'Delete') backspaces += 1;
+  if (startedAt === null) startedAt = performance.now();
+});
+
+document.getElementById('submit').addEventListener('click', () => {
+  if (!document.getElementById('consent').checked) {
+    alert('Consent is required before recording study data.');
+    return;
+  }
+  const participant = document.getElementById('participant').value.trim();
+  if (!participant) {
+    alert('Enter an anonymous participant code.');
+    return;
+  }
+  if (!promptBox.value.trim()) {
+    alert('Enter a prompt before continuing.');
+    return;
+  }
+
+  const endedAt = performance.now();
+  records.push({
+    anonymous_participant_id: participant,
+    task_id: tasks[current].task_id,
+    device: document.getElementById('device').value,
+    typing_condition: document.getElementById('condition').value,
+    autocorrect_status: document.getElementById('autocorrect').value,
+    final_prompt: promptBox.value,
+    typing_duration_ms: Math.round(endedAt - (startedAt ?? endedAt)),
+    backspace_count: backspaces,
+    edit_count: edits
+  });
+
+  current += 1;
+  renderTask();
+});
+
+function csvEscape(value) {
+  const s = String(value ?? '');
+  return '"' + s.replaceAll('"', '""') + '"';
+}
+
+document.getElementById('download').addEventListener('click', () => {
+  if (!records.length) {
+    alert('No study records collected yet.');
+    return;
+  }
+  const keys = Object.keys(records[0]);
+  const rows = [keys.join(',')];
+  for (const record of records) {
+    rows.push(keys.map(k => csvEscape(record[k])).join(','));
+  }
+  const blob = new Blob([rows.join('\n')], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'typing-study.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
