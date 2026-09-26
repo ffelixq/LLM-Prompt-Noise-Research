@@ -1,0 +1,50 @@
+[
+  {
+    "task_id": "HT_001",
+    "intent": "Ask an AI to calculate the final price of a $120 item after a 15% discount."
+  },
+  {
+    "task_id": "HT_002",
+    "intent": "Ask an AI which number is larger: 13 or 31, and request only the number."
+  },
+  {
+    "task_id": "HT_003",
+    "intent": "Ask an AI to explain briefly why binary search has logarithmic time complexity."
+  },
+  {
+    "task_id": "HT_004",
+    "intent": "Ask an AI to write a Python expression that gets the last item of a list named items."
+  },
+  {
+    "task_id": "HT_005",
+    "intent": "Ask an AI to return only the city from: Mina arrived in Kyoto on Tuesday."
+  },
+  {
+    "task_id": "HT_006",
+    "intent": "Ask an AI whether every Zorp must be a Nap if all Zorps are Mips and all Mips are Naps."
+  },
+  {
+    "task_id": "HT_007",
+    "intent": "Ask an AI to calculate 25% of 360 and return only the number."
+  },
+  {
+    "task_id": "HT_008",
+    "intent": "Ask an AI what the Python equality comparison operator is and request only the operator."
+  },
+  {
+    "task_id": "HT_009",
+    "intent": "Ask an AI to sort pear, apple and mango alphabetically and return comma-separated words."
+  },
+  {
+    "task_id": "HT_010",
+    "intent": "Ask an AI which day is three days after Monday and request only the weekday."
+  },
+  {
+    "task_id": "HT_011",
+    "intent": "Ask an AI which gas plants primarily absorb for photosynthesis."
+  },
+  {
+    "task_id": "HT_012",
+    "intent": "Ask an AI to calculate the mean of 4, 8, 10 and 14."
+  }
+]
