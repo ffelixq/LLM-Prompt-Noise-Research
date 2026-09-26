@@ -5,8 +5,10 @@ import argparse
 import pandas as pd
 
 from .analysis import summarise_results
+from .dyslexia_generation import generate_dyslexia_file
 from .experiment import run_experiment
 from .generation import generate_file
+from .statistics import write_mcnemar
 from .validation import validate_variants
 
 
@@ -14,12 +16,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="promptnoise")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    generate = sub.add_parser("generate", help="Generate noisy prompt variants")
+    generate = sub.add_parser("generate", help="Generate main noisy prompt variants")
     generate.add_argument("--input", required=True)
     generate.add_argument("--output", required=True)
     generate.add_argument("--seed", type=int, default=20260927)
 
-    validate = sub.add_parser("validate", help="Validate generated variants")
+    dyslexia = sub.add_parser(
+        "generate-dyslexia",
+        help="Generate separate dyslexia-associated writing-phenomena variants",
+    )
+    dyslexia.add_argument("--input", required=True)
+    dyslexia.add_argument("--output", required=True)
+    dyslexia.add_argument("--seed", type=int, default=20260927)
+
+    validate = sub.add_parser("validate", help="Validate generated main variants")
     validate.add_argument("--input", required=True)
 
     run = sub.add_parser("run", help="Run one configured model")
@@ -34,6 +44,11 @@ def build_parser() -> argparse.ArgumentParser:
     analyse.add_argument("--input", required=True)
     analyse.add_argument("--output", required=True)
 
+    stats = sub.add_parser("mcnemar", help="Run paired McNemar test vs clean")
+    stats.add_argument("--input", required=True)
+    stats.add_argument("--condition", required=True)
+    stats.add_argument("--output", required=True)
+
     return parser
 
 
@@ -43,6 +58,10 @@ def main() -> None:
     if args.command == "generate":
         frame = generate_file(args.input, args.output, args.seed)
         print(f"Generated {len(frame)} rows -> {args.output}")
+
+    elif args.command == "generate-dyslexia":
+        frame = generate_dyslexia_file(args.input, args.output, args.seed)
+        print(f"Generated {len(frame)} dyslexia-associated rows -> {args.output}")
 
     elif args.command == "validate":
         frame = pd.read_csv(args.input)
@@ -68,6 +87,10 @@ def main() -> None:
     elif args.command == "analyse":
         frame = summarise_results(args.input, args.output)
         print(f"Wrote {len(frame)} summary rows -> {args.output}")
+
+    elif args.command == "mcnemar":
+        frame = write_mcnemar(args.input, args.condition, args.output)
+        print(f"Wrote {len(frame)} paired test rows -> {args.output}")
 
 
 if __name__ == "__main__":
