@@ -1,0 +1,37 @@
+# Provider/model availability changes quickly.
+# Verify exact IDs, pricing and quotas immediately before final data collection.
+models:
+  example_openai:
+    provider: openai
+    model: REPLACE_WITH_CURRENT_MODEL_ID
+    enabled: false
+    temperature: 0
+    max_output_tokens: 128
+
+  example_groq:
+    provider: groq
+    model: REPLACE_WITH_CURRENT_MODEL_ID
+    enabled: false
+    temperature: 0
+    max_output_tokens: 128
+
+  example_google:
+    provider: google
+    model: REPLACE_WITH_CURRENT_MODEL_ID
+    enabled: false
+    temperature: 0
+    max_output_tokens: 128
+
+  example_anthropic:
+    provider: anthropic
+    model: REPLACE_WITH_CURRENT_MODEL_ID
+    enabled: false
+    temperature: 0
+    max_output_tokens: 128
+
+  example_deepseek:
+    provider: deepseek
+    model: REPLACE_WITH_CURRENT_MODEL_ID
+    enabled: false
+    temperature: 0
+    max_output_tokens: 128
