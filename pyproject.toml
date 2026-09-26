@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-prompt-noise-research"
+version = "0.1.0"
+description = "Benchmarking real-world prompt noise effects on LLM accuracy and efficiency"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0",
+  "pandas>=2.2",
+  "pydantic>=2.8",
+  "PyYAML>=6.0",
+  "rapidfuzz>=3.9",
+  "python-dotenv>=1.0",
+  "httpx>=0.27",
+  "scipy>=1.13",
+  "statsmodels>=0.14"
+]
+
+[project.optional-dependencies]
+providers = [
+  "openai>=2.0",
+  "anthropic>=0.40",
+  "groq>=0.15",
+  "google-genai>=1.0"
+]
+dashboard = [
+  "streamlit>=1.40",
+  "plotly>=5.24"
+]
+dev = [
+  "pytest>=8.3",
+  "ruff>=0.7"
+]
+
+[project.scripts]
+promptnoise = "promptnoise.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
