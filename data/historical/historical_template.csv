@@ -1,0 +1,2 @@
+historical_id,noisy_prompt,clean_prompt,usage_class,context_dependent,typo,textese,grammar_noise,singlish,dyslexia_associated_pattern,insertion_count,deletion_count,substitution_count,transposition_count,missing_space_count,merged_word_count,real_word_error_count,homophone_error_count,semantic_equivalent,review_notes
+HIST_EXAMPLE_001,,,pattern_only,false,false,false,false,false,false,0,0,0,0,0,0,0,0,false,"Template row only; replace with privacy-reviewed data."
