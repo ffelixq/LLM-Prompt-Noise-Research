@@ -1,0 +1,28 @@
+experiment:
+  name: pilot_v1
+  seed: 20260927
+  benchmark_path: data/benchmark/pilot_50.csv
+
+generation:
+  preserve_numbers: true
+  preserve_code_tokens: true
+  typo_rates: [0.02, 0.05, 0.10, 0.20]
+  conditions:
+    - clean
+    - typo_02
+    - typo_05
+    - typo_10
+    - typo_20
+    - grammar
+    - textese
+    - singlish_pilot
+    - mixed_realistic
+
+evaluation:
+  exact_match_case_sensitive: false
+  strip_whitespace: true
+  reproducibility_subset_size: 10
+
+privacy:
+  allow_raw_historical_prompts: false
+  require_safe_direct_use_flag: true
