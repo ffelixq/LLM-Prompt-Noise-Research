@@ -1,0 +1,2 @@
+anonymous_participant_id,task_id,device,typing_condition,autocorrect_status,final_prompt,typing_duration_ms,backspace_count,edit_count,self_reported_dyslexia
+P_EXAMPLE,TASK_EXAMPLE,laptop,careful,unknown,,0,0,0,
