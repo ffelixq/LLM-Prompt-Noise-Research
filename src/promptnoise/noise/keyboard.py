@@ -25,10 +25,14 @@ class KeyboardEdit:
 def _protected_spans(text: str, protected_tokens: list[str] | None) -> list[tuple[int, int]]:
     spans: list[tuple[int, int]] = []
     tokens = [t for t in (protected_tokens or []) if t]
-    # Numbers are protected by default because changing a number changes many benchmark answers.
+    # Numbers are protected by default because changing them can change ground truth.
     tokens.extend(re.findall(r"\b\d+(?:\.\d+)?\b", text))
+
     for token in sorted(set(tokens), key=len, reverse=True):
-        pattern = re.escape(token)
+        escaped = re.escape(token)
+        # A protected token like "A" should protect answer choice A, not every
+        # occurrence of the letter a inside ordinary words.
+        pattern = rf"(?<!\w){escaped}(?!\w)" if token.isalnum() else escaped
         for match in re.finditer(pattern, text, flags=re.IGNORECASE):
             spans.append((match.start(), match.end()))
     return spans
@@ -36,6 +40,18 @@ def _protected_spans(text: str, protected_tokens: list[str] | None) -> list[tupl
 
 def _is_protected(index: int, spans: list[tuple[int, int]]) -> bool:
     return any(start <= index < end for start, end in spans)
+
+
+def _adjacent_edit(chars: list[str], idx: int, rng: random.Random) -> KeyboardEdit | None:
+    original = chars[idx]
+    neighbors = QWERTY_NEIGHBORS.get(original.lower())
+    if not neighbors:
+        return None
+    replacement = rng.choice(neighbors)
+    if original.isupper():
+        replacement = replacement.upper()
+    chars[idx] = replacement
+    return KeyboardEdit("adjacent", idx, original, replacement)
 
 
 def keyboard_noise(
@@ -47,7 +63,9 @@ def keyboard_noise(
     """Apply QWERTY-aware character noise.
 
     The target number of edits is based on eligible alphabetic characters.
-    Numbers and supplied protected tokens are not modified.
+    Numbers and supplied protected tokens are not modified. A positive noise
+    rate is guaranteed to produce at least one actual edit when an eligible
+    alphabetic character exists.
     """
 
     chars = list(text)
@@ -71,14 +89,9 @@ def keyboard_noise(
         op = rng.choice(["adjacent", "delete", "insert", "transpose"])
 
         if op == "adjacent":
-            neighbors = QWERTY_NEIGHBORS.get(original.lower())
-            if not neighbors:
-                continue
-            replacement = rng.choice(neighbors)
-            if original.isupper():
-                replacement = replacement.upper()
-            chars[idx] = replacement
-            edits.append(KeyboardEdit(op, idx, original, replacement))
+            edit = _adjacent_edit(chars, idx, rng)
+            if edit:
+                edits.append(edit)
 
         elif op == "delete":
             del chars[idx]
@@ -91,10 +104,27 @@ def keyboard_noise(
             edits.append(KeyboardEdit(op, idx, "", inserted))
 
         elif op == "transpose":
-            if idx + 1 < len(chars) and chars[idx + 1].isalpha():
+            can_transpose = (
+                idx + 1 < len(chars)
+                and chars[idx + 1].isalpha()
+                and not _is_protected(idx + 1, spans)
+            )
+            if can_transpose:
                 before = chars[idx] + chars[idx + 1]
                 chars[idx], chars[idx + 1] = chars[idx + 1], chars[idx]
                 after = chars[idx] + chars[idx + 1]
                 edits.append(KeyboardEdit(op, idx, before, after))
+            else:
+                # Do not let a randomly invalid transposition create a zero-noise row.
+                edit = _adjacent_edit(chars, idx, rng)
+                if edit:
+                    edits.append(edit)
+
+    if not edits:
+        # Defensive fallback for any unforeseen edge case.
+        idx = eligible[0]
+        edit = _adjacent_edit(chars, idx, rng)
+        if edit:
+            edits.append(edit)
 
     return "".join(chars), [e.__dict__ for e in edits]
